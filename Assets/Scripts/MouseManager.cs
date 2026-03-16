@@ -22,6 +22,8 @@ public class MouseManager : MonoBehaviour
     public LayerMask trashLayer;
     private Camera mainCamera;
 
+    public GameObject sweepParticlePrefab;
+
     void Start()
     {
         mainCamera = Camera.main;
@@ -91,7 +93,16 @@ public class MouseManager : MonoBehaviour
         // Example: Click trash to destroy it
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, trashLayer))
         {
-            Debug.Log("Swept Trash!");
+            Debug.Log("Swept up trash: " + hit.collider.gameObject.name);
+            if (sweepParticlePrefab != null)
+            {
+                Instantiate(sweepParticlePrefab, hit.transform.position, Quaternion.identity);
+            }
+
+            // Optional: Play a sweeping sound effect here!
+            // AudioSource.PlayClipAtPoint(sweepSound, hit.transform.position);
+
+            // 2. Destroy the poop!
             Destroy(hit.collider.gameObject);
         }
     }

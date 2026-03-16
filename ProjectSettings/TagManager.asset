@@ -5,15 +5,16 @@ TagManager:
   serializedVersion: 3
   tags:
   - Food
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - dropLayer
+  - Drop
   - Water
   - UI
   - Human
-  - 
+  - Trash
   - 
   - 
   - 

@@ -24,6 +24,8 @@ public class FoodItem : MonoBehaviour
         // Optional: Add happiness if your food has it
         human.currentHappiness += foodData.bonusHappiness;
 
+        human.currentBowelLevel += foodData.wasteValue;
+
         // Clamp so it doesn't go over max (Reads max from the human's SO)
         human.currentHunger = Mathf.Clamp(human.currentHunger, 0f, human.humanData.maxHunger);
         human.currentHappiness = Mathf.Clamp(human.currentHappiness, 0f, human.humanData.maxHappiness);
@@ -31,4 +33,6 @@ public class FoodItem : MonoBehaviour
         // The food destroys ITSELF!
         Destroy(gameObject);
     }
+
+
 }

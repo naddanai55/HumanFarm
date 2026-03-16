@@ -8,9 +8,27 @@ public class HumanAI : MonoBehaviour
         Wander,
         SeekFood,
         Eating,
+        Pooping,
         ReadyToHarvest,
         Dead
     }
+
+    public enum EmojiType 
+    { 
+        None, 
+        Happy, 
+        Hungry, 
+        Angry, 
+        Brain 
+    }
+
+    [Header("3D Emoji Models")]
+    public GameObject happyEmoji;
+    public GameObject hungryEmoji;
+    public GameObject angryEmoji;
+    public GameObject brainEmoji;
+    private EmojiType currentEmoji = EmojiType.None;
+
 
     [Header("State")]
     public HumanState currentState = HumanState.Wander;
@@ -22,19 +40,21 @@ public class HumanAI : MonoBehaviour
     public float currentHunger;
     public float currentHappiness;
     public float currentGrowth;
-
-    // [Header("References")]
-    // [SerializeField] GameObject headModel;
-
+    public float currentBowelLevel;
     private NavMeshAgent agent;
+    public GameObject poopPrefab;
+    // public ParticleSystem poopParticle;
+    private float poopingTimer = 0f;
+    private float timeToPoop = 2f;
     private Transform targetFood;
-    private string foodTag = "Food";
     private float oneSecondTimer = 0f;
     private float eatingTimer = 0f;
     private FoodItem currentFood;
     private Animator animator;
+    private string foodTag = "Food";
+    private string poopingAnimString = "IsPooping";
     private string eatingAnimString = "IsEating";
-
+    private string deadAnimString = "IsDead";
 
     void Start()
     {
@@ -45,6 +65,7 @@ public class HumanAI : MonoBehaviour
         currentHunger = humanData.maxHunger;
         currentHappiness = humanData.maxHappiness;
         currentGrowth = 0f;
+        currentBowelLevel = 0f;
 
         // 2. Set Movement Speed from SO
         agent.speed = humanData.moveSpeed;
@@ -71,12 +92,14 @@ public class HumanAI : MonoBehaviour
             // Notice we REMOVED Time.deltaTime here, because this only runs once per second!
             currentHunger -= humanData.hungerDepletionRate;
 
-            currentHappiness -= humanData.happinessDepletionRate;
+            // currentHappiness -= humanData.happinessDepletionRate;
             currentHappiness = Mathf.Clamp(currentHappiness, 0f, humanData.maxHappiness);
 
             // 3. Growth depends on Happiness! 
             float happinessMultiplier = currentHappiness / humanData.maxHappiness;
             currentGrowth += humanData.maxBrainGrowthRate * happinessMultiplier;
+
+            UpdateEmojiIndicator();
 
             // 4. Check if we need to change state based on the new stats
             CheckStateTransitions();
@@ -94,6 +117,9 @@ public class HumanAI : MonoBehaviour
             case HumanState.Eating:
                 HandleEating(currentFood);
                 break;
+            case HumanState.Pooping:   // <-- RUN NEW BEHAVIOR
+                HandlePooping();
+                break;
         }
     }
 
@@ -109,6 +135,10 @@ public class HumanAI : MonoBehaviour
         else if (currentGrowth >= humanData.maxGrowth)
         {
             ChangeState(HumanState.ReadyToHarvest);
+        }
+        else if (currentBowelLevel >= humanData.bowelCapacity && currentState == HumanState.Wander)
+        {
+            ChangeState(HumanState.Pooping);
         }
         else if (currentHunger < humanData.seekFoodThreshold && currentState == HumanState.Wander)
         {
@@ -133,6 +163,10 @@ public class HumanAI : MonoBehaviour
 
             case HumanState.Eating:
                 agent.isStopped = true;
+                break;
+
+            case HumanState.Pooping: // <-- NEW STATE SETUP
+                StartPooping();
                 break;
 
             case HumanState.ReadyToHarvest:
@@ -210,6 +244,8 @@ public class HumanAI : MonoBehaviour
             // 2. Tell the food to consume itself and apply stats to "this" human!
             food.Consume(this);
 
+            currentBowelLevel += 50f;
+
             // clear the reference; the object may now be destroyed
             targetFood = null;
             currentFood = null;
@@ -230,6 +266,34 @@ public class HumanAI : MonoBehaviour
         if (NavMesh.SamplePosition(randomDirection, out hit, 5f, NavMesh.AllAreas))
         {
             agent.SetDestination(hit.position);
+        }
+    }
+
+    void StartPooping()
+    {
+        agent.isStopped = true;
+        poopingTimer = 0f;
+
+        if (animator != null) animator.SetBool(poopingAnimString, true);
+        // if (poopParticle != null) poopParticle.Play();
+    }
+
+    void HandlePooping()
+    {
+        poopingTimer += Time.deltaTime;
+
+        if (poopingTimer >= timeToPoop)
+        {
+            // 1. Spawn the poop slightly behind the human so they don't get stuck in it
+            Vector3 spawnPos = transform.position - (transform.forward * 0.5f);
+            Instantiate(poopPrefab, spawnPos, Quaternion.identity);
+
+            // 2. Reset the bowel level
+            currentBowelLevel = 0f;
+
+            // 3. Stop the animation and go back to wandering
+            if (animator != null) animator.SetBool(poopingAnimString, false);
+            ChangeState(HumanState.Wander);
         }
     }
 
@@ -265,6 +329,69 @@ public class HumanAI : MonoBehaviour
             currentFood = other.GetComponent<FoodItem>();
             eatingTimer = 0f;
             ChangeState(HumanState.Eating);
+        }
+    }
+
+    void UpdateEmojiIndicator()
+    {
+        // PRIORITY 1: Ready to Harvest (Highest Priority)
+        if (currentState == HumanState.ReadyToHarvest)
+        {
+            SetEmoji(EmojiType.Brain);
+            return; // Stop checking!
+        }
+
+        // PRIORITY 2: Angry (Because they smelled poop!)
+        // If Happiness drops below 50%, they show the angry face.
+        if (currentHappiness < (humanData.maxHappiness * 0.5f))
+        {
+            SetEmoji(EmojiType.Angry);
+            return;
+        }
+
+        // PRIORITY 3: Hungry
+        if (currentState == HumanState.SeekFood)
+        {
+            SetEmoji(EmojiType.Hungry);
+            return;
+        }
+
+        // PRIORITY 4: Happy (Default state if well-fed and clean!)
+        if (currentState == HumanState.Eating)
+        {
+            SetEmoji(EmojiType.Happy);
+            return;
+        }
+    }
+
+    void SetEmoji(EmojiType newEmoji)
+    {
+        // If we are already showing this emoji, do nothing to save performance!
+        if (currentEmoji == newEmoji) return;
+
+        currentEmoji = newEmoji;
+
+        // 1. Turn ALL emojis off first
+        if (happyEmoji != null) happyEmoji.SetActive(false);
+        if (hungryEmoji != null) hungryEmoji.SetActive(false);
+        if (angryEmoji != null) angryEmoji.SetActive(false);
+        if (brainEmoji != null) brainEmoji.SetActive(false);
+
+        // 2. Turn on the exact one we need
+        switch (newEmoji)
+        {
+            case EmojiType.Happy:
+                if (happyEmoji != null) happyEmoji.SetActive(true);
+                break;
+            case EmojiType.Hungry:
+                if (hungryEmoji != null) hungryEmoji.SetActive(true);
+                break;
+            case EmojiType.Angry:
+                if (angryEmoji != null) angryEmoji.SetActive(true);
+                break;
+            case EmojiType.Brain:
+                if (brainEmoji != null) brainEmoji.SetActive(true);
+                break;
         }
     }
 }

@@ -8,6 +8,7 @@ public class HumanSO : ScriptableObject
     public float maxHunger = 100f;
     public float maxHappiness = 100f;
     public float maxGrowth = 100f;
+    public float bowelCapacity = 100f;
 
     [Header("AI Thresholds")]
     public float seekFoodThreshold = 50f;
