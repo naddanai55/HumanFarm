@@ -5,6 +5,7 @@ public class FoodSO : ScriptableObject
 {
     [Header("Identity")]
     public string foodName;
+    public Sprite foodIcon;
     public GameObject foodPrefab;
 
     [Header("Eating Mechanics")]

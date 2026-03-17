@@ -3,26 +3,30 @@ using UnityEngine.EventSystems;
 
 public class MouseManager : MonoBehaviour
 {
+    // 1. Only TWO tools now!
     public enum ToolType
     {
-        Pointer,
-        Food,
-        Broom,
-        Execute
+        Feed,
+        Kill
     }
 
     [Header("Current Tool")]
-    public ToolType currentTool = ToolType.Pointer;
+    public ToolType currentTool = ToolType.Feed;
+    public bool toolActive = false; // Track if a tool is currently selected
 
-    [Header("Food Tool Settings")]
-    [SerializeField] float dropOffsetY = 1.0f;
-    public GameObject itemPrefab;
-    public LayerMask dropLayer;
-    public LayerMask humanLayer;
-    public LayerMask trashLayer;
+    [Header("Prefabs & Effects")]
+    [HideInInspector] public GameObject currentFoodPrefab; 
+    [HideInInspector] public FoodSO currentFoodData;
+    public float dropOffsetY = 1.0f;
+    public GameObject sweepParticlePrefab; // Dust cloud for sweeping poop
+
+    [Header("Layers")]
+    public LayerMask dropLayer;         // Floor
+    public LayerMask humanLayer;        // Humans
+    public LayerMask trashLayer;        // Poop
+    public LayerMask collectibleLayer;  // NEW: Brains!
+
     private Camera mainCamera;
-
-    public GameObject sweepParticlePrefab;
 
     void Start()
     {
@@ -31,12 +35,10 @@ public class MouseManager : MonoBehaviour
 
     void Update()
     {
-        // Safety check: Are we clicking on a UI Button? If yes, stop here!
-        // We don't want to drop food behind the UI menu.
+        // Don't click through UI buttons!
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             return;
 
-        // Note: Using old Input system based on your code. 
         if (Input.GetMouseButtonDown(0))
         {
             HandleMouseClick();
@@ -45,88 +47,128 @@ public class MouseManager : MonoBehaviour
 
     void HandleMouseClick()
     {
-        // Create the ray laser from the mouse position once
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-        // 2. Decide what to do based on the current tool!
-        switch (currentTool)
+        // We shoot ONE raycast that hits EVERYTHING. Then we figure out what we hit based on its Layer!
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
         {
-            case ToolType.Pointer:
-                HandlePointer(ray);
-                break;
-            case ToolType.Food:
-                HandleFoodDrop(ray);
-                break;
-            case ToolType.Broom:
-                HandleBroom(ray);
-                break;
-            case ToolType.Execute:
-                HandleExecute(ray);
-                break;
+            int hitLayer = hit.collider.gameObject.layer;
+
+            // ==========================================
+            // PRIORITY 1: UNIVERSAL ACTIONS (Always work!)
+            // ==========================================
+
+            // Did we click Poop? (Sweep it)
+            if (((1 << hitLayer) & trashLayer) != 0)
+            {
+                HandleSweep(hit);
+                return; // Stop checking! We did our action.
+            }
+
+            // Did we click a Brain? (Collect it)
+            if (((1 << hitLayer) & collectibleLayer) != 0)
+            {
+                HandleCollectBrain(hit);
+                return; // Stop checking!
+            }
+
+            // ==========================================
+            // PRIORITY 2: EQUIPPED TOOL ACTIONS
+            // ==========================================
+
+            // Only execute tool actions if a tool is currently selected
+            if (!toolActive)
+                return;
+
+            if (currentTool == ToolType.Feed)
+            {
+                // Feed Tool: Click Human -> Show Info
+                if (((1 << hitLayer) & humanLayer) != 0)
+                {
+                    Debug.Log("Selected Human: " + hit.collider.gameObject.name);
+                    // OpenUI(hit.collider.GetComponent<HumanAI>());
+                }
+                // Feed Tool: Click Floor -> Drop Food
+                else if (((1 << hitLayer) & dropLayer) != 0)
+                {
+                    HandleFoodDrop(hit);
+                }
+            }
+            else if (currentTool == ToolType.Kill)
+            {
+                // Kill Tool: Click Human -> Execute
+                if (((1 << hitLayer) & humanLayer) != 0)
+                {
+                    HandleExecute(hit);
+                }
+                else
+                {
+                    Debug.Log("You missed! You can only kill humans.");
+                }
+            }
         }
     }
 
-    // --- TOOL ACTIONS ---
+    // --- ACTION METHODS ---
 
-    void HandleFoodDrop(Ray ray)
+    void HandleSweep(RaycastHit hit)
     {
-        // This is your exact original code!
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, dropLayer))
+        Debug.Log("Swept Poop!");
+        if (sweepParticlePrefab != null)
+        {
+            Instantiate(sweepParticlePrefab, hit.transform.position, Quaternion.identity);
+        }
+        Destroy(hit.collider.gameObject);
+    }
+
+    void HandleCollectBrain(RaycastHit hit)
+    {
+        Debug.Log("Collected a Brain!");
+        // TODO: Add to Inventory/GameManager here later!
+        
+        Destroy(hit.collider.gameObject);
+    }
+
+    void HandleFoodDrop(RaycastHit hit)
+    {
+        if (currentFoodPrefab == null) return;
+
+        if (InventoryManager.Instance.UseFood(currentFoodPrefab))
         {
             Vector3 spawnPosition = hit.point;
-            Instantiate(itemPrefab, spawnPosition + Vector3.up * dropOffsetY, Quaternion.identity);
+            Instantiate(currentFoodPrefab, spawnPosition + Vector3.up * dropOffsetY, Quaternion.identity);
+
+            // ---> REFRESH THE BUTTONS SO THE NUMBER GOES DOWN! <---
+            FindAnyObjectByType<UIToolbar>().RefreshToolbar();    
+        }
+        else
+        {
+            Debug.Log("Out of Food!");
         }
     }
 
-    void HandlePointer(Ray ray)
+    void HandleExecute(RaycastHit hit)
     {
-        // Example: Click a human to open their UI panel
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, humanLayer))
+        HumanAI human = hit.collider.GetComponent<HumanAI>();
+        if (human != null)
         {
-            Debug.Log("Clicked on Human: " + hit.collider.gameObject.name);
-            // OpenUI(hit.collider.GetComponent<HumanAI>());
-        }
-    }
-
-    void HandleBroom(Ray ray)
-    {
-        // Example: Click trash to destroy it
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, trashLayer))
-        {
-            Debug.Log("Swept up trash: " + hit.collider.gameObject.name);
-            if (sweepParticlePrefab != null)
-            {
-                Instantiate(sweepParticlePrefab, hit.transform.position, Quaternion.identity);
-            }
-
-            // Optional: Play a sweeping sound effect here!
-            // AudioSource.PlayClipAtPoint(sweepSound, hit.transform.position);
-
-            // 2. Destroy the poop!
-            Destroy(hit.collider.gameObject);
-        }
-    }
-
-    void HandleExecute(Ray ray)
-    {
-        // Example: Click a fully grown human to harvest brain
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, humanLayer))
-        {
-            HumanAI human = hit.collider.GetComponent<HumanAI>();
-            if (human != null && human.currentState == HumanAI.HumanState.ReadyToHarvest)
-            {
-                Debug.Log("Harvested Brain!");
-                // Spawn Brain Item, Add Money, Destroy Human
-            }
+            human.ExecuteHuman(); // Kills them immediately!
         }
     }
 
     // --- UI CAN CALL THIS TO CHANGE TOOLS ---
-
     public void SelectTool(int toolIndex)
     {
-        // 0 = Pointer, 1 = Food, 2 = Broom, 3 = Execute
+        // 0 = Feed, 1 = Kill
         currentTool = (ToolType)toolIndex;
+        toolActive = true;
         Debug.Log("Tool changed to: " + currentTool.ToString());
+    }
+
+    // --- UI CALLS THIS WHEN TOGGLING OFF A BUTTON ---
+    public void DeactivateTool()
+    {
+        toolActive = false;
+        Debug.Log("Tool deactivated!");
     }
 }

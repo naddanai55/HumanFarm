@@ -13,21 +13,21 @@ public class HumanAI : MonoBehaviour
         Dead
     }
 
-    public enum EmojiType 
-    { 
-        None, 
-        Happy, 
-        Hungry, 
-        Angry, 
-        Brain 
-    }
+    // public enum EmojiType 
+    // { 
+    //     None, 
+    //     Happy, 
+    //     Hungry, 
+    //     Angry, 
+    //     Brain 
+    // }
 
-    [Header("3D Emoji Models")]
-    public GameObject happyEmoji;
-    public GameObject hungryEmoji;
-    public GameObject angryEmoji;
-    public GameObject brainEmoji;
-    private EmojiType currentEmoji = EmojiType.None;
+    // [Header("3D Emoji Models")]
+    // public GameObject happyEmoji;
+    // public GameObject hungryEmoji;
+    // public GameObject angryEmoji;
+    // public GameObject brainEmoji;
+    // private EmojiType currentEmoji = EmojiType.None;
 
 
     [Header("State")]
@@ -54,6 +54,10 @@ public class HumanAI : MonoBehaviour
     private string foodTag = "Food";
     private string poopingAnimString = "IsPooping";
     private string eatingAnimString = "IsEating";
+
+    [Header("Harvesting Effects")]
+    public GameObject brainPrefab;      // The item that drops (or just a particle effect)
+    public ParticleSystem bloodParticle; // The blood effect that plays on execution
     private string deadAnimString = "IsDead";
 
     void Start()
@@ -99,7 +103,7 @@ public class HumanAI : MonoBehaviour
             float happinessMultiplier = currentHappiness / humanData.maxHappiness;
             currentGrowth += humanData.maxBrainGrowthRate * happinessMultiplier;
 
-            UpdateEmojiIndicator();
+            // UpdateEmojiIndicator();
 
             // 4. Check if we need to change state based on the new stats
             CheckStateTransitions();
@@ -297,6 +301,51 @@ public class HumanAI : MonoBehaviour
         }
     }
 
+    public void ExecuteHuman()
+    {
+        // 1. Play the blood/death effect no matter what!
+        if (bloodParticle != null)
+        {
+            bloodParticle.transform.parent = null; 
+            bloodParticle.Play();
+            Destroy(bloodParticle.gameObject, 2f); 
+        }
+
+        // 2. Did we wait until they were fully grown?
+        if (currentState == HumanState.ReadyToHarvest)
+        {
+            // YES! Drop the Brain!
+            float happinessMultiplier = currentHappiness / humanData.maxHappiness;
+            int finalBrainValue = Mathf.RoundToInt(humanData.baseBrainValue * happinessMultiplier);
+
+            Debug.Log("Harvested a ripe brain worth: $" + finalBrainValue);
+
+            if (brainPrefab != null)
+            {
+                GameObject droppedBrain = Instantiate(brainPrefab, transform.position, Quaternion.identity);
+                
+                // 2. Get the script on the brain
+                BrainItem brainScript = droppedBrain.GetComponent<BrainItem>();
+                
+                // 3. Tell the brain its name and calculated value!
+                if (brainScript != null)
+                {
+                    // (Assuming you add 'typeName' to your HumanSO, like "Gym Bro Brain")
+                    string nameOfBrain = humanData.HumanName + " Brain"; 
+                    brainScript.SetupBrain(nameOfBrain, finalBrainValue);
+                }
+            }
+        }
+        else
+        {
+            // NO! Executed too early.
+            Debug.Log("Executed early! The human died, but the brain was ruined. No drop!");
+        }
+
+        // 3. Destroy the Human body no matter what!
+        Destroy(gameObject);
+    }
+
     /// <summary>
     /// Finds the closest food object using the configured tag.  Returns null if none are found.
     /// </summary>
@@ -332,66 +381,66 @@ public class HumanAI : MonoBehaviour
         }
     }
 
-    void UpdateEmojiIndicator()
-    {
-        // PRIORITY 1: Ready to Harvest (Highest Priority)
-        if (currentState == HumanState.ReadyToHarvest)
-        {
-            SetEmoji(EmojiType.Brain);
-            return; // Stop checking!
-        }
+    // void UpdateEmojiIndicator()
+    // {
+    //     // PRIORITY 1: Ready to Harvest (Highest Priority)
+    //     if (currentState == HumanState.ReadyToHarvest)
+    //     {
+    //         SetEmoji(EmojiType.Brain);
+    //         return; // Stop checking!
+    //     }
 
-        // PRIORITY 2: Angry (Because they smelled poop!)
-        // If Happiness drops below 50%, they show the angry face.
-        if (currentHappiness < (humanData.maxHappiness * 0.5f))
-        {
-            SetEmoji(EmojiType.Angry);
-            return;
-        }
+    //     // PRIORITY 2: Angry (Because they smelled poop!)
+    //     // If Happiness drops below 50%, they show the angry face.
+    //     if (currentHappiness < (humanData.maxHappiness * 0.5f))
+    //     {
+    //         SetEmoji(EmojiType.Angry);
+    //         return;
+    //     }
 
-        // PRIORITY 3: Hungry
-        if (currentState == HumanState.SeekFood)
-        {
-            SetEmoji(EmojiType.Hungry);
-            return;
-        }
+    //     // PRIORITY 3: Hungry
+    //     if (currentState == HumanState.SeekFood)
+    //     {
+    //         SetEmoji(EmojiType.Hungry);
+    //         return;
+    //     }
 
-        // PRIORITY 4: Happy (Default state if well-fed and clean!)
-        if (currentState == HumanState.Eating)
-        {
-            SetEmoji(EmojiType.Happy);
-            return;
-        }
-    }
+    //     // PRIORITY 4: Happy (Default state if well-fed and clean!)
+    //     if (currentState == HumanState.Eating)
+    //     {
+    //         SetEmoji(EmojiType.Happy);
+    //         return;
+    //     }
+    // }
 
-    void SetEmoji(EmojiType newEmoji)
-    {
-        // If we are already showing this emoji, do nothing to save performance!
-        if (currentEmoji == newEmoji) return;
+    // void SetEmoji(EmojiType newEmoji)
+    // {
+    //     // If we are already showing this emoji, do nothing to save performance!
+    //     if (currentEmoji == newEmoji) return;
 
-        currentEmoji = newEmoji;
+    //     currentEmoji = newEmoji;
 
-        // 1. Turn ALL emojis off first
-        if (happyEmoji != null) happyEmoji.SetActive(false);
-        if (hungryEmoji != null) hungryEmoji.SetActive(false);
-        if (angryEmoji != null) angryEmoji.SetActive(false);
-        if (brainEmoji != null) brainEmoji.SetActive(false);
+    //     // 1. Turn ALL emojis off first
+    //     if (happyEmoji != null) happyEmoji.SetActive(false);
+    //     if (hungryEmoji != null) hungryEmoji.SetActive(false);
+    //     if (angryEmoji != null) angryEmoji.SetActive(false);
+    //     if (brainEmoji != null) brainEmoji.SetActive(false);
 
-        // 2. Turn on the exact one we need
-        switch (newEmoji)
-        {
-            case EmojiType.Happy:
-                if (happyEmoji != null) happyEmoji.SetActive(true);
-                break;
-            case EmojiType.Hungry:
-                if (hungryEmoji != null) hungryEmoji.SetActive(true);
-                break;
-            case EmojiType.Angry:
-                if (angryEmoji != null) angryEmoji.SetActive(true);
-                break;
-            case EmojiType.Brain:
-                if (brainEmoji != null) brainEmoji.SetActive(true);
-                break;
-        }
-    }
+    //     // 2. Turn on the exact one we need
+    //     switch (newEmoji)
+    //     {
+    //         case EmojiType.Happy:
+    //             if (happyEmoji != null) happyEmoji.SetActive(true);
+    //             break;
+    //         case EmojiType.Hungry:
+    //             if (hungryEmoji != null) hungryEmoji.SetActive(true);
+    //             break;
+    //         case EmojiType.Angry:
+    //             if (angryEmoji != null) angryEmoji.SetActive(true);
+    //             break;
+    //         case EmojiType.Brain:
+    //             if (brainEmoji != null) brainEmoji.SetActive(true);
+    //             break;
+    //     }
+    // }
 }
