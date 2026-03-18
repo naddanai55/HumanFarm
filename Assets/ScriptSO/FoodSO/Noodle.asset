@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a843d6db3f8cbd240ba459ff7e52227e, type: 3}
-  m_Name: Apple
+  m_Name: Noodle
   m_EditorClassIdentifier: 
-  foodName: Apple
+  foodName: 
   foodIcon: {fileID: 0}
-  foodPrefab: {fileID: 5753671707853943288, guid: 0c7a3190bdf0b614f9c225536940e35c, type: 3}
-  nutritionValue: 15
-  eatingDuration: 1.5
-  bonusHappiness: 5
-  wasteValue: 10
-  costToDrop: 2
+  foodPrefab: {fileID: 0}
+  nutritionValue: 30
+  eatingDuration: 2
+  bonusHappiness: 8
+  wasteValue: 20
+  costToDrop: 4

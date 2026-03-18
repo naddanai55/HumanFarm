@@ -6,13 +6,12 @@ public class UIToolbar : MonoBehaviour
     public MouseManager mouseManager;
     
     [Header("UI Setup")]
-    public GameObject toolButtonPrefab; // Drag your Button Prefab here
-    public Transform buttonContainer;   // Drag your ToolbarContainer here
+    public GameObject toolButtonPrefab;
+    public Transform buttonContainer;
 
     [Header("Knife Settings")]
-    public Sprite knifeIcon;            // Drag your Knife picture here
-
-    private ToolButton selectedButton;  // Track the currently selected button
+    public Sprite knifeIcon;
+    private ToolButton selectedButton;
 
     void Start()
     {
@@ -90,11 +89,6 @@ public class UIToolbar : MonoBehaviour
             Debug.Log("Equipped " + data.foodName);
         });
     }
-
-    /// <summary>
-    /// Selects a button and deselects the previously selected one.
-    /// Clicking the same button again toggles it OFF.
-    /// </summary>
     public void SelectButton(ToolButton newButton)
     {
         // If clicking the same button, toggle it off

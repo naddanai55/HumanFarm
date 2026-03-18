@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 568aef68fa107a64b90d564aa56817c3, type: 3}
-  m_Name: Guy
+  m_Name: Doctor
   m_EditorClassIdentifier: 
-  HumanName: Guy
-  profilePic: {fileID: 21300000, guid: 9d99f82d9cc621647bcc7ff0173a8ba4, type: 3}
-  maxHunger: 100
-  maxHappiness: 30
-  maxGrowth: 100
-  bowelCapacity: 150
-  seekFoodThreshold: 50
-  starveThreshold: 0
-  hungerDepletionRate: 2
-  happinessDepletionRate: 4
-  maxBrainGrowthRate: 1
-  moveSpeed: 2
-  purchaseCost: 20
-  baseValueZCoins: 40
+  HumanName: Doctor
+  profilePic: {fileID: 21300000, guid: 58dde91314a2aa94f843c301ef138a5a, type: 3}
+  maxHunger: 110
+  maxHappiness: 120
+  maxGrowth: 140
+  bowelCapacity: 90
+  seekFoodThreshold: 40
+  starveThreshold: 15
+  hungerDepletionRate: 1.8
+  happinessDepletionRate: 0.8
+  maxBrainGrowthRate: 5
+  moveSpeed: 2.5
+  purchaseCost: 100
+  baseValueZCoins: 150
   baseBrainValue: 100

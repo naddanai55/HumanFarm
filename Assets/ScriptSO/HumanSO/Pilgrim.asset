@@ -10,17 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 568aef68fa107a64b90d564aa56817c3, type: 3}
-  m_Name: Cop
+  m_Name: Pilgrim
   m_EditorClassIdentifier: 
-  HumanName: Cop
-  maxHunger: 120
-  maxHappiness: 100
-  maxGrowth: 90
-  seekFoodThreshold: 50
-  starveThreshold: 0
-  hungerDepletionRate: 2
-  happinessDepletionRate: 2
-  maxBrainGrowthRate: 1
-  moveSpeed: 2
-  purchaseCost: 50
+  HumanName: Pilgrim
+  profilePic: {fileID: 21300000, guid: 6e2488dd30ea11c4bbbe6ac37e51cacc, type: 3}
+  maxHunger: 130
+  maxHappiness: 110
+  maxGrowth: 120
+  bowelCapacity: 140
+  seekFoodThreshold: 35
+  starveThreshold: 5
+  hungerDepletionRate: 1.5
+  happinessDepletionRate: 0.8
+  maxBrainGrowthRate: 2.5
+  moveSpeed: 1.8
+  purchaseCost: 60
+  baseValueZCoins: 110
   baseBrainValue: 100

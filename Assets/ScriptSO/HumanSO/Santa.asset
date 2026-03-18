@@ -10,17 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 568aef68fa107a64b90d564aa56817c3, type: 3}
-  m_Name: Cop
+  m_Name: Santa
   m_EditorClassIdentifier: 
-  HumanName: Cop
-  maxHunger: 120
-  maxHappiness: 100
-  maxGrowth: 90
-  seekFoodThreshold: 50
-  starveThreshold: 0
-  hungerDepletionRate: 2
-  happinessDepletionRate: 2
-  maxBrainGrowthRate: 1
-  moveSpeed: 2
-  purchaseCost: 50
+  HumanName: Santa
+  profilePic: {fileID: 21300000, guid: 1c2238b87f3075f409159b5416912a13, type: 3}
+  maxHunger: 150
+  maxHappiness: 150
+  maxGrowth: 200
+  bowelCapacity: 150
+  seekFoodThreshold: 70
+  starveThreshold: 20
+  hungerDepletionRate: 2.5
+  happinessDepletionRate: 0.2
+  maxBrainGrowthRate: 4
+  moveSpeed: 1.5
+  purchaseCost: 200
+  baseValueZCoins: 300
   baseBrainValue: 100

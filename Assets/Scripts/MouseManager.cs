@@ -3,20 +3,21 @@ using UnityEngine.EventSystems;
 
 public class MouseManager : MonoBehaviour
 {
-    // 1. Only TWO tools now!
     public enum ToolType
     {
         Feed,
-        Kill
+        Kill,
+        None
     }
 
     [Header("Current Tool")]
-    public ToolType currentTool = ToolType.Feed;
-    public bool toolActive = false; // Track if a tool is currently selected
+    public ToolType currentTool = ToolType.None;
+    public bool toolActive = false;
 
     [Header("Prefabs & Effects")]
     [HideInInspector] public GameObject currentFoodPrefab; 
     [HideInInspector] public FoodSO currentFoodData;
+
     public float dropOffsetY = 1.0f;
     public GameObject sweepParticlePrefab; // Dust cloud for sweeping poop
 
@@ -26,11 +27,16 @@ public class MouseManager : MonoBehaviour
     public LayerMask trashLayer;        // Poop
     public LayerMask collectibleLayer;  // NEW: Brains!
 
+
+    private HumanInfoUI humanInfoUI;
+    private GameManager gameManager;
     private Camera mainCamera;
 
     void Start()
     {
         mainCamera = Camera.main;
+        gameManager = FindFirstObjectByType<GameManager>();
+        humanInfoUI = FindFirstObjectByType<HumanInfoUI>();
     }
 
     void Update()
@@ -39,9 +45,13 @@ public class MouseManager : MonoBehaviour
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             return;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)) // Left-click
         {
             HandleMouseClick();
+        }
+        if (Input.GetMouseButtonDown(1)) // Right-click to deselect tool
+        {
+            DeactivateTool();
         }
     }
 
@@ -49,47 +59,33 @@ public class MouseManager : MonoBehaviour
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-        // We shoot ONE raycast that hits EVERYTHING. Then we figure out what we hit based on its Layer!
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
         {
             int hitLayer = hit.collider.gameObject.layer;
 
-            // ==========================================
-            // PRIORITY 1: UNIVERSAL ACTIONS (Always work!)
-            // ==========================================
-
-            // Did we click Poop? (Sweep it)
             if (((1 << hitLayer) & trashLayer) != 0)
             {
                 HandleSweep(hit);
-                return; // Stop checking! We did our action.
+                return;
             }
 
-            // Did we click a Brain? (Collect it)
             if (((1 << hitLayer) & collectibleLayer) != 0)
             {
                 HandleCollectBrain(hit);
-                return; // Stop checking!
+                return;
             }
 
-            // ==========================================
-            // PRIORITY 2: EQUIPPED TOOL ACTIONS
-            // ==========================================
+            if (((1 << hitLayer) & humanLayer) != 0)
+            {
+                HandleShowInfo(hit);
+            }
 
-            // Only execute tool actions if a tool is currently selected
             if (!toolActive)
                 return;
 
             if (currentTool == ToolType.Feed)
             {
-                // Feed Tool: Click Human -> Show Info
-                if (((1 << hitLayer) & humanLayer) != 0)
-                {
-                    Debug.Log("Selected Human: " + hit.collider.gameObject.name);
-                    // OpenUI(hit.collider.GetComponent<HumanAI>());
-                }
-                // Feed Tool: Click Floor -> Drop Food
-                else if (((1 << hitLayer) & dropLayer) != 0)
+                if (((1 << hitLayer) & dropLayer) != 0)
                 {
                     HandleFoodDrop(hit);
                 }
@@ -106,10 +102,9 @@ public class MouseManager : MonoBehaviour
                     Debug.Log("You missed! You can only kill humans.");
                 }
             }
+
         }
     }
-
-    // --- ACTION METHODS ---
 
     void HandleSweep(RaycastHit hit)
     {
@@ -123,9 +118,15 @@ public class MouseManager : MonoBehaviour
 
     void HandleCollectBrain(RaycastHit hit)
     {
-        Debug.Log("Collected a Brain!");
-        // TODO: Add to Inventory/GameManager here later!
-        
+        BrainItem brain = hit.collider.GetComponent<BrainItem>();
+        int value = brain != null ? brain.zCoinValue : 0;
+
+        if (value > 0 && gameManager != null)
+        {
+            gameManager.AddZCoins(value);
+        }
+
+        Debug.Log($"Collected a Brain! (+{value} Z-Coins)");
         Destroy(hit.collider.gameObject);
     }
 
@@ -144,6 +145,16 @@ public class MouseManager : MonoBehaviour
         else
         {
             Debug.Log("Out of Food!");
+        }
+    }
+
+    void HandleShowInfo(RaycastHit hit)
+    {
+        HumanAI human = hit.collider.GetComponent<HumanAI>();
+        if (human != null)
+        {
+            humanInfoUI.ShowPanel(human);
+            
         }
     }
 
@@ -168,6 +179,7 @@ public class MouseManager : MonoBehaviour
     // --- UI CALLS THIS WHEN TOGGLING OFF A BUTTON ---
     public void DeactivateTool()
     {
+        currentTool = ToolType.None;
         toolActive = false;
         Debug.Log("Tool deactivated!");
     }

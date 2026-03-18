@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "HumanSO", menuName = "Scriptable Objects/HumanSO")]
 public class HumanSO : ScriptableObject
 {
     [Header("Identity")]
     public string HumanName;
+    public Sprite profilePic; // (Optional: If you want profile pictures in the UI!)
     public float maxHunger = 100f;
     public float maxHappiness = 100f;
     public float maxGrowth = 100f;
@@ -26,5 +28,19 @@ public class HumanSO : ScriptableObject
 
     [Header("Economy")]
     public int purchaseCost = 50;
-    public int baseBrainValue = 100;
+
+    [Tooltip("Base value (in Z-Coins) when Happiness is 100%.")]
+    public int baseValueZCoins = 100;
+
+    [FormerlySerializedAs("baseBrainValue")]
+    [SerializeField, Tooltip("Deprecated. Kept only for backwards compatibility with existing assets.")]
+    private int baseBrainValue = 100;
+
+    private void OnValidate()
+    {
+        if (baseValueZCoins <= 0 && baseBrainValue > 0)
+        {
+            baseValueZCoins = baseBrainValue;
+        }
+    }
 }

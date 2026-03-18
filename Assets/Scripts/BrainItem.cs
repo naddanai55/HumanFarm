@@ -2,14 +2,20 @@ using UnityEngine;
 
 public class BrainItem : MonoBehaviour
 {
+    [SerializeField] float rotationSpeed = 50f;
+
     [Header("Brain Data")]
     public string brainName = "Standard Brain";
-    public int zCoinValue = 0; // The MouseManager will read this!
+    public int zCoinValue = 0;
 
-    // The HumanAI script will call this the exact moment the brain spawns
     public void SetupBrain(string name, int value)
     {
         brainName = name;
         zCoinValue = value;
+    }
+
+    void Update()
+    {
+        transform.Rotate(-1 * Vector3.up, rotationSpeed * Time.deltaTime);
     }
 }
