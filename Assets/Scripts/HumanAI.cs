@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class HumanAI : MonoBehaviour
 {
@@ -39,8 +40,9 @@ public class HumanAI : MonoBehaviour
     private string eatingAnimString = "IsEating";
     public GameObject brainPrefab;
     [SerializeField] float brainHeightOffset = -1f;
-    public ParticleSystem bloodParticle;
+    public GameObject bloodParticle;
     private string deadAnimString = "IsDead";
+    [SerializeField] GameObject deadParticle;
 
     void Start()
     {
@@ -58,7 +60,7 @@ public class HumanAI : MonoBehaviour
 
     void Update()
     {
-        if (currentState == HumanState.ReadyToHarvest || currentState == HumanState.Dead)
+        if (currentState == HumanState.Dead)
         {
             return;
         }
@@ -69,6 +71,13 @@ public class HumanAI : MonoBehaviour
         {
             oneSecondTimer = 0f;
             currentHunger -= humanData.hungerDepletionRate;
+            currentHappiness -= humanData.happinessDepletionOverTime;
+
+            if (currentBowelLevel > (humanData.bowelCapacity / 2f))
+            {
+                currentBowelLevel += humanData.bowelRate;
+            }
+
             currentHappiness = Mathf.Clamp(currentHappiness, 0f, humanData.maxHappiness);
 
             float happinessMultiplier = currentHappiness / humanData.maxHappiness;
@@ -91,6 +100,9 @@ public class HumanAI : MonoBehaviour
                 break;
             case HumanState.Pooping:
                 HandlePooping();
+                break;
+            case HumanState.ReadyToHarvest:
+                HandleWander();
                 break;
         }
     }
@@ -139,10 +151,14 @@ public class HumanAI : MonoBehaviour
                 break;
 
             case HumanState.ReadyToHarvest:
+                agent.speed = humanData.moveSpeed * 0.5f; // Slower speed when ready to harvest
+                agent.isStopped = false;
+                SetNewWanderDestination();
                 break;
 
             case HumanState.Dead:
                 agent.isStopped = true;
+                HandleDeath();
                 break;
         }
     }
@@ -151,6 +167,7 @@ public class HumanAI : MonoBehaviour
     {
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
+            animator.SetBool(eatingAnimString, false);
             SetNewWanderDestination();
         }
     }
@@ -263,9 +280,7 @@ public class HumanAI : MonoBehaviour
     {
         if (bloodParticle != null)
         {
-            bloodParticle.transform.parent = null; 
-            bloodParticle.Play();
-            Destroy(bloodParticle.gameObject, 2f); 
+            Instantiate(bloodParticle, transform.position, Quaternion.identity);
         }
 
         if (currentState == HumanState.ReadyToHarvest)
@@ -308,4 +323,20 @@ public class HumanAI : MonoBehaviour
             ChangeState(HumanState.Eating);
         }
     }
+
+void HandleDeath()
+{
+    animator.SetBool(deadAnimString, true);
+    StartCoroutine(DeathRoutine());
+}
+
+IEnumerator DeathRoutine()
+{
+    yield return new WaitForSeconds(1f); // wait 1 second
+
+    Instantiate(deadParticle, transform.position + Vector3.up * 1.5f, Quaternion.identity);
+
+    yield return new WaitForSeconds(1.5f); // remaining time (2.5 - 1)
+    Destroy(gameObject);
+}
 }

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a843d6db3f8cbd240ba459ff7e52227e, type: 3}
   m_Name: Lamb
   m_EditorClassIdentifier: 
-  foodName: 
-  foodIcon: {fileID: 0}
-  foodPrefab: {fileID: 0}
-  nutritionValue: 65
-  eatingDuration: 3.5
+  foodName: Lamp
+  foodIcon: {fileID: 21300000, guid: ceb912cf8f303634d87b6b372dbe8b47, type: 3}
+  foodPrefab: {fileID: 6057930514916703949, guid: 246b725953d52a94cb6ddd52e4f418c7, type: 3}
+  nutritionValue: 75
+  eatingDuration: 7
   bonusHappiness: 15
   wasteValue: 50
-  costToDrop: 10
+  purchaseCost: 20

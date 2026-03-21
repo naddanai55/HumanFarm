@@ -10,17 +10,13 @@ public class UIToolbar : MonoBehaviour
     public Transform buttonContainer;
 
     [Header("Knife Settings")]
-    public Sprite knifeIcon;
+    public Image knifeIcon;
     private ToolButton selectedButton;
 
     void Start()
     {
         RefreshToolbar();
-        // Auto-select the Knife button (always first)
-        if (buttonContainer.childCount > 0)
-        {
-            SelectButton(buttonContainer.GetChild(0).GetComponent<ToolButton>());
-        }
+        // No auto-selection - start with no tool selected
     }
 
     // Call this whenever you Buy food or Drop food!
@@ -55,7 +51,7 @@ public class UIToolbar : MonoBehaviour
         ToolButton btnScript = newBtnObj.GetComponent<ToolButton>();
 
         // Set Icon and Text
-        btnScript.icon.sprite = knifeIcon;
+        btnScript.icon = knifeIcon;
         btnScript.amountText.text = "KILL";
 
         // Tell the button what to do when clicked!

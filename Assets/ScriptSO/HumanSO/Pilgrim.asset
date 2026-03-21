@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HumanName: Pilgrim
   profilePic: {fileID: 21300000, guid: 6e2488dd30ea11c4bbbe6ac37e51cacc, type: 3}
-  maxHunger: 130
-  maxHappiness: 110
-  maxGrowth: 120
+  maxHunger: 100
+  maxHappiness: 50
+  maxGrowth: 100
   bowelCapacity: 140
-  seekFoodThreshold: 35
-  starveThreshold: 5
-  hungerDepletionRate: 1.5
-  happinessDepletionRate: 0.8
-  maxBrainGrowthRate: 2.5
+  seekFoodThreshold: 30
+  starveThreshold: 1
+  hungerDepletionRate: 0.5
+  happinessDepletionRate: 3
+  happinessDepletionOverTime: 0.5
+  bowelRate: 0.5
+  maxBrainGrowthRate: 2
   moveSpeed: 1.8
   purchaseCost: 60
   baseValueZCoins: 110
-  baseBrainValue: 100

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Apple
   m_EditorClassIdentifier: 
   foodName: Apple
-  foodIcon: {fileID: 0}
-  foodPrefab: {fileID: 5753671707853943288, guid: 0c7a3190bdf0b614f9c225536940e35c, type: 3}
-  nutritionValue: 15
-  eatingDuration: 1.5
+  foodIcon: {fileID: 21300000, guid: 7746648ff71dc88489e87423dc0c617d, type: 3}
+  foodPrefab: {fileID: 3610001912815010123, guid: de579cc6e39b3c6498a3718a88abcd1f, type: 3}
+  nutritionValue: 25
+  eatingDuration: 4
   bonusHappiness: 5
   wasteValue: 10
-  costToDrop: 2
+  purchaseCost: 4

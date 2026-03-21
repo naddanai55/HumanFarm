@@ -19,6 +19,8 @@ public class HumanSO : ScriptableObject
     [Header("Rates (Per Second)")]
     public float hungerDepletionRate = 2f;
     public float happinessDepletionRate = 1f;
+    public float happinessDepletionOverTime = 0.5f;
+    public float bowelRate = 0.5f;
 
     [Tooltip("The speed the brain grows when Happiness is at 100%")]
     public float maxBrainGrowthRate = 5f;
@@ -31,16 +33,4 @@ public class HumanSO : ScriptableObject
 
     [Tooltip("Base value (in Z-Coins) when Happiness is 100%.")]
     public int baseValueZCoins = 100;
-
-    [FormerlySerializedAs("baseBrainValue")]
-    [SerializeField, Tooltip("Deprecated. Kept only for backwards compatibility with existing assets.")]
-    private int baseBrainValue = 100;
-
-    private void OnValidate()
-    {
-        if (baseValueZCoins <= 0 && baseBrainValue > 0)
-        {
-            baseValueZCoins = baseBrainValue;
-        }
-    }
 }

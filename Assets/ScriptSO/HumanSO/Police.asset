@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HumanName: Police
   profilePic: {fileID: 21300000, guid: 2c7b63d80db82b04794afb790e231ac3, type: 3}
-  maxHunger: 120
-  maxHappiness: 100
-  maxGrowth: 110
-  bowelCapacity: 100
+  maxHunger: 100
+  maxHappiness: 40
+  maxGrowth: 100
+  bowelCapacity: 90
   seekFoodThreshold: 60
-  starveThreshold: 10
+  starveThreshold: 1
   hungerDepletionRate: 2
-  happinessDepletionRate: 1
-  maxBrainGrowthRate: 3
+  happinessDepletionRate: 4
+  happinessDepletionOverTime: 0.5
+  bowelRate: 0.5
+  maxBrainGrowthRate: 1
   moveSpeed: 3
   purchaseCost: 50
   baseValueZCoins: 80
-  baseBrainValue: 100

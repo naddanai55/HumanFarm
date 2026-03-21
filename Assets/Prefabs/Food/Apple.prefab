@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: 2453046266791207030, guid: 0c7a3190bdf0b614f9c225536940e35c, type: 3}
       propertyPath: foodData
       value: 
-      objectReference: {fileID: 11400000, guid: bc4b86a43e81ac24e8d2a5bd8273ddf8, type: 2}
+      objectReference: {fileID: 11400000, guid: 54edc9a3cf0b07045a0362ff8e7dffc3, type: 2}
     - target: {fileID: 5753671707853943288, guid: 0c7a3190bdf0b614f9c225536940e35c, type: 3}
       propertyPath: m_Name
       value: Apple

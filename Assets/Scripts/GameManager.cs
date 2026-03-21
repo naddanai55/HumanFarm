@@ -3,7 +3,6 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Z-Coins")]
     public int zCoins = 0;
     [SerializeField] TMP_Text zCoinText;
 
@@ -23,7 +22,7 @@ public class GameManager : MonoBehaviour
         zCoins = Mathf.Max(zCoins, 0);
     }
 
-    public bool TrySpendZCoins(int amount)
+    public bool SpendZCoins(int amount)
     {
         if (amount <= 0) return true;
         if (zCoins < amount) return false;

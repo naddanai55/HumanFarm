@@ -33,4 +33,26 @@ public class InventoryManager : MonoBehaviour
         }
         return false; // Out of food!
     }
+
+    // Call this when you buy food from the shop.
+    public void AddFood(GameObject foodPrefab, int amount = 1)
+    {
+        if (foodPrefab == null) return;
+        if (amount <= 0) return;
+
+        foreach (var slot in foodInventory)
+        {
+            if (slot.foodPrefab == foodPrefab)
+            {
+                slot.amount += amount;
+                return;
+            }
+        }
+
+        foodInventory.Add(new FoodInventorySlot
+        {
+            foodPrefab = foodPrefab,
+            amount = amount
+        });
+    }
 }

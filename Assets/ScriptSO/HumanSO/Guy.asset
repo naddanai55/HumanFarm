@@ -17,13 +17,14 @@ MonoBehaviour:
   maxHunger: 100
   maxHappiness: 30
   maxGrowth: 100
-  bowelCapacity: 150
+  bowelCapacity: 35
   seekFoodThreshold: 50
-  starveThreshold: 0
-  hungerDepletionRate: 2
-  happinessDepletionRate: 4
-  maxBrainGrowthRate: 1
+  starveThreshold: 1
+  hungerDepletionRate: 1.5
+  happinessDepletionRate: 5
+  happinessDepletionOverTime: 0.25
+  bowelRate: 0.5
+  maxBrainGrowthRate: 50
   moveSpeed: 2
   purchaseCost: 20
   baseValueZCoins: 40
-  baseBrainValue: 100

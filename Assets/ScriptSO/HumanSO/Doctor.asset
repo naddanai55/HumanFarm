@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HumanName: Doctor
   profilePic: {fileID: 21300000, guid: 58dde91314a2aa94f843c301ef138a5a, type: 3}
-  maxHunger: 110
-  maxHappiness: 120
-  maxGrowth: 140
+  maxHunger: 100
+  maxHappiness: 40
+  maxGrowth: 100
   bowelCapacity: 90
   seekFoodThreshold: 40
-  starveThreshold: 15
-  hungerDepletionRate: 1.8
-  happinessDepletionRate: 0.8
-  maxBrainGrowthRate: 5
+  starveThreshold: 1
+  hungerDepletionRate: 1.5
+  happinessDepletionRate: 2
+  happinessDepletionOverTime: 0.5
+  bowelRate: 0.5
+  maxBrainGrowthRate: 3
   moveSpeed: 2.5
   purchaseCost: 100
   baseValueZCoins: 150
-  baseBrainValue: 100

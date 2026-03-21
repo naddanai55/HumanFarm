@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HumanName: Santa
   profilePic: {fileID: 21300000, guid: 1c2238b87f3075f409159b5416912a13, type: 3}
-  maxHunger: 150
-  maxHappiness: 150
-  maxGrowth: 200
-  bowelCapacity: 150
+  maxHunger: 100
+  maxHappiness: 60
+  maxGrowth: 100
+  bowelCapacity: 140
   seekFoodThreshold: 70
-  starveThreshold: 20
-  hungerDepletionRate: 2.5
-  happinessDepletionRate: 0.2
-  maxBrainGrowthRate: 4
+  starveThreshold: 1
+  hungerDepletionRate: 1
+  happinessDepletionRate: 1
+  happinessDepletionOverTime: 0.5
+  bowelRate: 0.5
+  maxBrainGrowthRate: 2
   moveSpeed: 1.5
   purchaseCost: 200
   baseValueZCoins: 300
-  baseBrainValue: 100

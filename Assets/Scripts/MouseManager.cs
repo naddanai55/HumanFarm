@@ -77,7 +77,15 @@ public class MouseManager : MonoBehaviour
 
             if (((1 << hitLayer) & humanLayer) != 0)
             {
-                HandleShowInfo(hit);
+                if (toolActive && currentTool == ToolType.Kill)
+                {
+                    HandleExecute(hit);
+                }
+                else
+                {
+                    HandleShowInfo(hit);
+                }
+                return;
             }
 
             if (!toolActive)
@@ -90,19 +98,6 @@ public class MouseManager : MonoBehaviour
                     HandleFoodDrop(hit);
                 }
             }
-            else if (currentTool == ToolType.Kill)
-            {
-                // Kill Tool: Click Human -> Execute
-                if (((1 << hitLayer) & humanLayer) != 0)
-                {
-                    HandleExecute(hit);
-                }
-                else
-                {
-                    Debug.Log("You missed! You can only kill humans.");
-                }
-            }
-
         }
     }
 

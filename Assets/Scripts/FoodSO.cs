@@ -13,7 +13,5 @@ public class FoodSO : ScriptableObject
     public float eatingDuration = 2f;
     public float bonusHappiness = 10f;
     public float wasteValue = 50f;
-
-    [Header("Economy")]
-    public int costToDrop = 5;
+    public int purchaseCost = 20;
 }
